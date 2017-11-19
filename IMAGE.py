@@ -10,7 +10,7 @@ class Image:
 
 		self.filename = filename
 		self.topic = topic
-		self.reducedMatrix = reducedMatrix
+		
 		
 		folder = DATAPATH + TOPIC[topic]
 		channel = 1
@@ -25,14 +25,14 @@ class Image:
 
 		if img is not None:
 			if scope == "GLOBAL":
-				self.hist = self.computeGlobalHist(img, featureType, filters)
+				self.hist = self.computeGlobalHist(img, featureType, filters, reducedMatrix)
 			else:
-				self.hist = self.computeLocalHist(img, featureType, filters, width, height, channel)
+				self.hist = self.computeLocalHist(img, featureType, filters, reducedMatrix, width, height, channel)
 		else:
 			return None
 		
 
-	def computeGlobalHist(self, img, featureType, filters):
+	def computeGlobalHist(self, img, featureType, filters, reducedMatrix):
 	
 		if featureType == "COLOR":	
 			globalHist = self.computeColorHist(img)
@@ -40,15 +40,15 @@ class Image:
 			globalHist = self.computeGaborFilterResponse(img, filters)
 
 		if RANDOM_PROJECTION:
-			assert(globalHist.size == self.reducedMatrix.shape[1])
-			globalHist = np.dot(self.reducedMatrix, globalHist)
+			assert(globalHist.size == reducedMatrix.shape[1])
+			globalHist = np.dot(reducedMatrix, globalHist)
 
 		##normalize
 		globalHist /= np.sum(globalHist)
 
 		return globalHist
 		
-	def computeLocalHist(self, img, featureType, filters, width, height, channel):
+	def computeLocalHist(self, img, featureType, filters, reducedMatrix, width, height, channel):
 
 		localHists = np.zeros(0)
 		if featureType == "COLOR":
@@ -71,8 +71,8 @@ class Image:
 		localHists = localHists.flatten()
 		
 		if RANDOM_PROJECTION:
-			assert(localHists.size == self.reducedMatrix.shape[1])
-			localHists = np.dot(self.reducedMatrix, localHists)
+			assert(localHists.size == reducedMatrix.shape[1])
+			localHists = np.dot(reducedMatrix, localHists)
 
 		localHists /= sum(localHists)
 
